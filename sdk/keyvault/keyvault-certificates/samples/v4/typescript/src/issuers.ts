@@ -73,17 +73,11 @@ async function updateACertificateIssuer() {
 }
 
 async function getACertificateIssuer() {
-  if (false) {
-    await client.createIssuer(issuerName, "Test");
-  }
   const certificateIssuer = await client.getIssuer(issuerName);
   console.log(certificateIssuer);
 }
 
 async function deleteACertificateIssuer() {
-  if (false) {
-    await client.createIssuer(issuerName, "Test");
-  }
   await client.deleteIssuer(issuerName);
 }
 

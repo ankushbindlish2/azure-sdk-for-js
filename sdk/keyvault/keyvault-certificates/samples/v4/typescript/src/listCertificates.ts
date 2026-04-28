@@ -6,13 +6,13 @@
  */
 
 // Load the .env file if it exists
-require("dotenv/config");
-const { DefaultAzureCredential } = require("@azure/identity");
-const { CertificateClient } = require("@azure/keyvault-certificates");
+import "dotenv/config";
+import { DefaultAzureCredential } from "@azure/identity";
+import { CertificateClient } from "@azure/keyvault-certificates";
 
-let client;
-let certificateName1;
-let certificateName2;
+let client: CertificateClient;
+let certificateName1: string;
+let certificateName2: string;
 
 async function createCertificates() {
   // Creating two self-signed certificates. They will appear as pending initially.
@@ -43,23 +43,13 @@ async function updateAndListCertificateVersions() {
   console.log("Updated certificate:", updatedCertificate);
   // Listing a certificate's versions
   for await (const item of client.listPropertiesOfCertificateVersions(certificateName1, {})) {
-    const version = item.version;
+    const version = item.version!;
     const certificate = await client.getCertificateVersion(certificateName1, version);
     console.log(`Certificate from version ${version}: `, certificate);
   }
 }
 
 async function listAllCertificates() {
-  if (false) {
-    const createPoller = await client.beginCreateCertificate(certificateName1, {
-      issuerName: "Self",
-      subject: "cn=MyCert",
-    });
-    await createPoller.pollUntilDone();
-    const deletePoller = await client.beginDeleteCertificate(certificateName1);
-    await deletePoller.pollUntilDone();
-  }
-
   for await (const certificateProperties of client.listPropertiesOfCertificates()) {
     console.log("Certificate properties: ", certificateProperties);
   }
@@ -74,16 +64,6 @@ async function listAllCertificates() {
 }
 
 async function listCertificatesByPage() {
-  if (false) {
-    const createPoller = await client.beginCreateCertificate(certificateName2, {
-      issuerName: "Self",
-      subject: "cn=MyCert",
-    });
-    await createPoller.pollUntilDone();
-    const deletePoller = await client.beginDeleteCertificate(certificateName2);
-    await deletePoller.pollUntilDone();
-  }
-
   for await (const page of client.listPropertiesOfCertificates().byPage()) {
     for (const certificateProperties of page) {
       console.log("Certificate properties: ", certificateProperties);
@@ -116,26 +96,19 @@ async function listCertificateProperties() {
 }
 
 async function listCertificateVersions() {
-  if (false) {
-    const createPoller = await client.beginCreateCertificate(certificateName1, {
-      issuerName: "Self",
-      subject: "cn=MyCert",
-    });
-    await createPoller.pollUntilDone();
-  }
   for await (const certificateProperties of client.listPropertiesOfCertificateVersions(
     certificateName1,
   )) {
-    console.log(certificateProperties.version);
+    console.log(certificateProperties.version!);
   }
 }
 
-async function main() {
+export async function main(): Promise<void> {
   // This sample uses DefaultAzureCredential, which supports a number of authentication mechanisms.
   // See https://learn.microsoft.com/javascript/api/overview/azure/identity-readme?view=azure-node-latest for more information
   // about DefaultAzureCredential and the other credentials that are available for use.
   // If you're using MSI, DefaultAzureCredential should "just work".
-  client = new CertificateClient(process.env["KEYVAULT_URI"], new DefaultAzureCredential());
+  client = new CertificateClient(process.env["KEYVAULT_URI"]!, new DefaultAzureCredential());
   certificateName1 = `list-1${new Date().getTime()}`;
   certificateName2 = `list-2${new Date().getTime()}`;
   await createCertificates();
@@ -150,5 +123,3 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-
-module.exports = { main };
